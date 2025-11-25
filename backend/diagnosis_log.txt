@@ -1,0 +1,7 @@
+Starting diagnosis...
+[2025-11-25T03:53:51.053Z] ℹ️  URI found: mongodb+srv://memeMaster:****@cluster0.ykuj4.mongodb.net/?appName=Cluster0
+[2025-11-25T03:53:51.055Z] ⏳ Connecting to MongoDB...
+[2025-11-25T03:53:52.098Z] ✅ Connected successfully!
+[2025-11-25T03:53:52.100Z] ℹ️  Database Name: test
+[2025-11-25T03:53:52.101Z] ℹ️  Host: cluster0-shard-00-00.ykuj4.mongodb.net
+[2025-11-25T03:53:52.105Z] 👋 Disconnected
