@@ -29,7 +29,7 @@ services:
     rootDir: frontend
     envVars:
       - key: VITE_API_URL
-        value: https://meme-backend.onrender.com/api
+        value: https://meme-backend-3i5g.onrender.com/api
     routes:
       - type: rewrite
         source: /*
