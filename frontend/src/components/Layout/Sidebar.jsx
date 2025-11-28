@@ -1,10 +1,9 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, Image } from 'lucide-react';
+import { PlusCircle, Image } from 'lucide-react';
 
 const Sidebar = () => {
   const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: PlusCircle, label: 'Create Meme', path: '/create' },
     { icon: Image, label: 'Gallery', path: '/gallery' },
   ];
