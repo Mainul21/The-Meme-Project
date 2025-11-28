@@ -21,13 +21,11 @@ services:
     healthCheckPath: /api/health
 
   # Frontend Static Site
-  - type: web
+  - type: pstatic
     name: meme-frontend
-    runtime: static
-    region: oregon
     plan: free
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    publishPath: dist
     rootDir: frontend
     envVars:
       - key: VITE_API_URL
