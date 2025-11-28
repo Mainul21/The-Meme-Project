@@ -7,7 +7,7 @@ const TemplateSelector = ({ onSelect, selectedTemplate }) => {
   return (
     <div className="w-full">
       <h3 className="text-lg font-semibold mb-4 text-slate-300">Choose Template</h3>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
         {memes.map((meme) => (
           <div
             key={meme.id}
