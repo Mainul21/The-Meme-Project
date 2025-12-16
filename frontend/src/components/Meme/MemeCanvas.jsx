@@ -67,28 +67,37 @@ const MemeCanvas = ({ template, captions = [], textColor = '#FFFFFF' }) => {
     };
   }, [template]);
 
-  const handleMouseDown = (e, index) => {
-    e.preventDefault();
+  const handleStart = (e, index) => {
+    // Prevent default to stop text selection or other default behaviors
+    if (e.cancelable) e.preventDefault();
+    
     setDraggingIndex(index);
     
-    const rect = containerRef.current.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
     const textElement = e.currentTarget;
     const textRect = textElement.getBoundingClientRect();
     
     setDragOffset({
-      x: e.clientX - textRect.left,
-      y: e.clientY - textRect.top
+      x: clientX - textRect.left,
+      y: clientY - textRect.top
     });
   };
 
-  const handleMouseMove = (e) => {
+  const handleMove = (e) => {
     if (draggingIndex === null || !containerRef.current) return;
+    
+    if (e.cancelable) e.preventDefault();
 
     const rect = containerRef.current.getBoundingClientRect();
     
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
     // Calculate new position as percentage
-    const x = ((e.clientX - rect.left - dragOffset.x) / rect.width) * 100;
-    const y = ((e.clientY - rect.top - dragOffset.y) / rect.height) * 100;
+    const x = ((clientX - rect.left - dragOffset.x) / rect.width) * 100;
+    const y = ((clientY - rect.top - dragOffset.y) / rect.height) * 100;
 
     // Clamp values between 0 and 100
     const clampedX = Math.max(0, Math.min(100, x));
@@ -101,19 +110,23 @@ const MemeCanvas = ({ template, captions = [], textColor = '#FFFFFF' }) => {
     });
   };
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
     setDraggingIndex(null);
   };
 
-  // Add global mouse event listeners
+  // Add global mouse/touch event listeners
   useEffect(() => {
     if (draggingIndex !== null) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', handleEnd);
+      window.addEventListener('touchmove', handleMove, { passive: false });
+      window.addEventListener('touchend', handleEnd);
       
       return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mousemove', handleMove);
+        window.removeEventListener('mouseup', handleEnd);
+        window.removeEventListener('touchmove', handleMove);
+        window.removeEventListener('touchend', handleEnd);
       };
     }
   }, [draggingIndex, dragOffset]);
@@ -193,7 +206,8 @@ const MemeCanvas = ({ template, captions = [], textColor = '#FFFFFF' }) => {
           return (
             <div
               key={index}
-              onMouseDown={(e) => handleMouseDown(e, index)}
+              onMouseDown={(e) => handleStart(e, index)}
+              onTouchStart={(e) => handleStart(e, index)}
               style={{
                 position: 'absolute',
                 left: `${textPositions[index].x}%`,

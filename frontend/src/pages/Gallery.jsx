@@ -2,23 +2,30 @@ import React, { useState, useEffect } from 'react';
 import Card from '../components/UI/Card';
 import { getSavedMemes, deleteMeme as deleteLocalMeme } from '../utils/memeStorage';
 import { api } from '../services/api';
-import { Download, Trash2, X, Loader2 } from 'lucide-react';
+import { Download, Trash2, X, Loader2, ChevronDown } from 'lucide-react';
 
 const Gallery = () => {
   const [savedMemes, setSavedMemes] = useState([]);
   const [selectedMeme, setSelectedMeme] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
-    loadMemes();
+    loadMemes(1);
   }, []);
 
-  const loadMemes = async () => {
-    setIsLoading(true);
+  const loadMemes = async (pageNum = 1) => {
+    if (pageNum === 1) setIsLoading(true);
+    else setIsLoadingMore(true);
+
     try {
       // Try to fetch from MongoDB first
-      const response = await api.getAllMemes();
+      const limit = 12;
+      const response = await api.getAllMemes(pageNum, limit);
+      
       const memesFromDB = response.memes.map(meme => ({
         id: meme._id,
         url: meme.imageData,
@@ -26,16 +33,34 @@ const Gallery = () => {
         template: meme.template,
         date: new Date(meme.createdAt).toISOString().split('T')[0]
       }));
-      setSavedMemes(memesFromDB);
+
+      if (pageNum === 1) {
+        setSavedMemes(memesFromDB);
+      } else {
+        setSavedMemes(prev => [...prev, ...memesFromDB]);
+      }
+      
+      setHasMore(response.currentPage < response.totalPages);
+      setPage(pageNum);
       setIsOnline(true);
     } catch (error) {
       console.error('Failed to fetch from server, using local storage:', error);
-      // Fallback to localStorage
-      const localMemes = getSavedMemes();
-      setSavedMemes(localMemes);
-      setIsOnline(false);
+      // Fallback to localStorage (only on first load as local storage doesn't support pagination in this context easily)
+      if (pageNum === 1) {
+        const localMemes = getSavedMemes();
+        setSavedMemes(localMemes);
+        setIsOnline(false);
+        setHasMore(false);
+      }
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!isLoadingMore && hasMore) {
+      loadMemes(page + 1);
     }
   };
 
@@ -50,8 +75,8 @@ const Gallery = () => {
           deleteLocalMeme(id);
         }
         
-        // Reload memes
-        loadMemes();
+        // Remove from local state immediately
+        setSavedMemes(prev => prev.filter(meme => meme.id !== id));
         
         if (selectedMeme?.id === id) {
           setSelectedMeme(null);
@@ -88,7 +113,7 @@ const Gallery = () => {
               Loading...
             </div>
           ) : (
-            `${savedMemes.length} meme${savedMemes.length !== 1 ? 's' : ''} saved`
+            `${savedMemes.length} meme${savedMemes.length !== 1 ? 's' : ''} loaded`
           )}
         </div>
       </div>
@@ -103,49 +128,75 @@ const Gallery = () => {
           <div className="text-slate-600 text-sm">Create and save your first meme to see it here!</div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {savedMemes.map((meme) => (
-            <Card key={meme.id} className="group hover:border-violet-500/50 transition-colors">
-              <div 
-                className="h-64 rounded-lg overflow-hidden bg-slate-800 mb-4 relative cursor-pointer"
-                onClick={() => setSelectedMeme(meme)}
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {savedMemes.map((meme) => (
+              <Card key={meme.id} className="group hover:border-violet-500/50 transition-colors">
+                <div 
+                  className="h-64 rounded-lg overflow-hidden bg-slate-800 mb-4 relative cursor-pointer"
+                  onClick={() => setSelectedMeme(meme)}
+                >
+                  <img 
+                    src={meme.url} 
+                    alt={meme.name}
+                    loading="lazy"
+                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button 
+                      className="p-2 bg-white/10 rounded-full hover:bg-white/20 text-white transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(meme);
+                      }}
+                    >
+                      <Download size={20} />
+                    </button>
+                    <button 
+                      className="p-2 bg-white/10 rounded-full hover:bg-red-500/50 text-white transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(meme.id);
+                      }}
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <h3 className="font-medium text-slate-200 truncate">{meme.name}</h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500">{meme.template}</span>
+                    <span className="text-xs text-slate-500">{meme.date}</span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {hasMore && isOnline && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <img 
-                  src={meme.url} 
-                  alt={meme.name}
-                  className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <button 
-                    className="p-2 bg-white/10 rounded-full hover:bg-white/20 text-white transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDownload(meme);
-                    }}
-                  >
-                    <Download size={20} />
-                  </button>
-                  <button 
-                    className="p-2 bg-white/10 rounded-full hover:bg-red-500/50 text-white transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(meme.id);
-                    }}
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-              </div>
-              <div className="flex flex-col gap-1">
-                <h3 className="font-medium text-slate-200 truncate">{meme.name}</h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-500">{meme.template}</span>
-                  <span className="text-xs text-slate-500">{meme.date}</span>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    Loading more...
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown size={20} />
+                    Load More
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Modal for viewing full-size meme */}

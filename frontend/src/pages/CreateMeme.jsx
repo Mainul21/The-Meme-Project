@@ -82,9 +82,9 @@ const CreateMeme = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 h-[calc(100vh-8rem)]">
+    <div className="flex flex-col lg:flex-row gap-8 lg:h-[calc(100vh-8rem)] min-h-[calc(100vh-8rem)] h-auto">
       {/* Left Panel: Controls */}
-      <div className="w-full lg:w-1/3 flex flex-col gap-6 overflow-y-auto pr-2 custom-scrollbar">
+      <div className="w-full lg:w-1/3 flex flex-col gap-6 lg:overflow-y-auto lg:pr-2 custom-scrollbar">
         <Card>
           <TemplateSelector 
             onSelect={handleTemplateSelect} 
@@ -155,7 +155,7 @@ const CreateMeme = () => {
       </div>
 
       {/* Right Panel: Preview */}
-      <div className="w-full lg:w-2/3 flex items-center justify-center bg-slate-900/30 rounded-2xl border border-slate-800/50 p-8 overflow-auto">
+      <div className="w-full lg:w-2/3 flex items-center justify-center bg-slate-900/30 rounded-2xl border border-slate-800/50 p-4 lg:p-8 overflow-auto min-h-[400px] lg:min-h-0">
         <MemeCanvas template={selectedTemplate} captions={captions} textColor={textColor} />
       </div>
     </div>
