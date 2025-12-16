@@ -1,62 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import Card from '../components/UI/Card';
-import { getSavedMemes, deleteMeme as deleteLocalMeme } from '../utils/memeStorage';
+import { deleteMeme as deleteLocalMeme } from '../utils/memeStorage';
 import { api } from '../services/api';
 import { Download, Trash2, X, Loader2, ChevronDown } from 'lucide-react';
+import { useMemeContext } from '../context/MemeContext';
 
 const Gallery = () => {
-  const [savedMemes, setSavedMemes] = useState([]);
+  const { 
+    memes: savedMemes, 
+    page, 
+    hasMore, 
+    isLoading, 
+    isLoadingMore, 
+    isOnline, 
+    loadMemes, 
+    removeMeme 
+  } = useMemeContext();
+  
   const [selectedMeme, setSelectedMeme] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
     loadMemes(1);
-  }, []);
-
-  const loadMemes = async (pageNum = 1) => {
-    if (pageNum === 1) setIsLoading(true);
-    else setIsLoadingMore(true);
-
-    try {
-      // Try to fetch from MongoDB first
-      const limit = 12;
-      const response = await api.getAllMemes(pageNum, limit);
-      
-      const memesFromDB = response.memes.map(meme => ({
-        id: meme._id,
-        url: meme.imageData,
-        name: meme.name,
-        template: meme.template,
-        date: new Date(meme.createdAt).toISOString().split('T')[0]
-      }));
-
-      if (pageNum === 1) {
-        setSavedMemes(memesFromDB);
-      } else {
-        setSavedMemes(prev => [...prev, ...memesFromDB]);
-      }
-      
-      setHasMore(response.currentPage < response.totalPages);
-      setPage(pageNum);
-      setIsOnline(true);
-    } catch (error) {
-      console.error('Failed to fetch from server, using local storage:', error);
-      // Fallback to localStorage (only on first load as local storage doesn't support pagination in this context easily)
-      if (pageNum === 1) {
-        const localMemes = getSavedMemes();
-        setSavedMemes(localMemes);
-        setIsOnline(false);
-        setHasMore(false);
-      }
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  };
+  }, [loadMemes]);
 
   const handleLoadMore = () => {
     if (!isLoadingMore && hasMore) {
@@ -75,8 +40,8 @@ const Gallery = () => {
           deleteLocalMeme(id);
         }
         
-        // Remove from local state immediately
-        setSavedMemes(prev => prev.filter(meme => meme.id !== id));
+        // Remove from context
+        removeMeme(id);
         
         if (selectedMeme?.id === id) {
           setSelectedMeme(null);

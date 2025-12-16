@@ -7,6 +7,7 @@ import Card from '../components/UI/Card';
 import { Download, Save, RefreshCw } from 'lucide-react';
 import { saveMeme } from '../utils/memeStorage';
 import { api } from '../services/api';
+import { useMemeContext } from '../context/MemeContext';
 
 const CreateMeme = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -14,6 +15,7 @@ const CreateMeme = () => {
   const [textColor, setTextColor] = useState('#FFFFFF');
   const [saveStatus, setSaveStatus] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const { refreshMemes } = useMemeContext();
 
   const handleTemplateSelect = (template) => {
     setSelectedTemplate(template);
@@ -61,6 +63,9 @@ const CreateMeme = () => {
           // Try to save to MongoDB first
           await api.uploadMeme(memeData);
           setSaveStatus('Saved to Cloud!');
+          
+          // Refresh gallery cache
+          refreshMemes();
           
           // Also save to localStorage as backup
           saveMeme(memeData);
