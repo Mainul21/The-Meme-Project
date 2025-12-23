@@ -4,12 +4,12 @@ import { PlusCircle, Image, X } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const navItems = [
-    { icon: PlusCircle, label: 'Create Meme', path: '/create' },
+    { icon: PlusCircle, label: 'Create Meme', path: '/upload' },
     { icon: Image, label: 'Gallery', path: '/gallery' },
   ];
 
   return (
-    <aside 
+    <aside
       className={`
         fixed left-0 top-0 z-50 h-screen w-64 bg-slate-900 border-r border-slate-800 flex flex-col
         transform transition-transform duration-300 ease-in-out
@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-500 to-pink-500 bg-clip-text text-transparent">
           MemeDashboard
         </h1>
-        <button 
+        <button
           onClick={onClose}
           className="lg:hidden p-1 text-slate-400 hover:text-white transition-colors"
         >
@@ -39,8 +39,8 @@ const Sidebar = ({ isOpen, onClose }) => {
             }}
             className={({ isActive }) => `
               flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-              ${isActive 
-                ? 'bg-violet-600/10 text-violet-400 border border-violet-500/20' 
+              ${isActive
+                ? 'bg-violet-600/10 text-violet-400 border border-violet-500/20'
                 : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
               }
             `}

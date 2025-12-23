@@ -14,16 +14,16 @@ const TemplateSelector = ({ onSelect, selectedTemplate }) => {
             onClick={() => onSelect(meme)}
             className={`
               cursor-pointer rounded-lg overflow-hidden border-2 transition-all duration-200 relative group
-              ${selectedTemplate?.id === meme.id 
-                ? 'border-violet-500 shadow-glow scale-[1.02]' 
+              ${selectedTemplate?.id === meme.id
+                ? 'border-violet-500 shadow-glow scale-[1.02]'
                 : 'border-transparent hover:border-slate-600 hover:scale-[1.02]'
               }
             `}
           >
-            <img 
-              src={meme.url} 
-              alt={meme.name} 
-              className="w-full h-32 object-cover bg-slate-800"
+            <img
+              src={meme.url}
+              alt={meme.name}
+              className="w-full aspect-square object-cover bg-slate-800"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">

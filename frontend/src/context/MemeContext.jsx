@@ -14,6 +14,7 @@ export const MemeProvider = ({ children }) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [lastFetched, setLastFetched] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   const loadMemes = useCallback(async (pageNum = 1, force = false) => {
     // If we have data and it's a fresh request for page 1 without force, don't reload
@@ -27,7 +28,7 @@ export const MemeProvider = ({ children }) => {
     try {
       const limit = 12;
       const response = await api.getAllMemes(pageNum, limit);
-      
+
       const memesFromDB = response.memes.map(meme => ({
         id: meme._id,
         url: meme.imageData,
@@ -46,7 +47,7 @@ export const MemeProvider = ({ children }) => {
           return [...prev, ...newMemes];
         });
       }
-      
+
       setHasMore(response.currentPage < response.totalPages);
       setPage(pageNum);
       setIsOnline(true);
@@ -88,7 +89,9 @@ export const MemeProvider = ({ children }) => {
     loadMemes,
     refreshMemes,
     addMeme,
-    removeMeme
+    removeMeme,
+    selectedTemplate,
+    setSelectedTemplate
   };
 
   return (
