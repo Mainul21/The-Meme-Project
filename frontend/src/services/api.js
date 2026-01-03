@@ -3,13 +3,16 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://meme-backend-3i5g.onren
 // API service for communicating with backend
 export const api = {
   // Upload a new meme to MongoDB
-  async uploadMeme(memeData) {
+  async uploadMeme(memeData, token) {
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch(`${API_URL}/memes`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           name: memeData.name,
           imageData: memeData.url,
@@ -61,11 +64,38 @@ export const api = {
     }
   },
 
-  // Delete a meme from MongoDB
-  async deleteMeme(id) {
+  // Vote on a meme
+  async voteMeme(id, type, token) {
     try {
+      const response = await fetch(`${API_URL}/memes/${id}/vote`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ type })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to vote');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error voting on meme:', error);
+      throw error;
+    }
+  },
+
+  // Delete a meme from MongoDB
+  async deleteMeme(id, token) {
+    try {
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch(`${API_URL}/memes/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers
       });
 
       if (!response.ok) {

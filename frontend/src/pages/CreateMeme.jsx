@@ -8,11 +8,14 @@ import { Download, Save, RefreshCw, Upload, PlusCircle } from 'lucide-react';
 import { saveMeme } from '../utils/memeStorage';
 import { api } from '../services/api';
 import { useMemeContext } from '../context/MemeContext';
+import { useAuth } from '../context/AuthContext';
 
 const CreateMeme = () => {
   const navigate = useNavigate();
   const { selectedTemplate, refreshMemes } = useMemeContext();
+  const { user } = useAuth();
   const [textFields, setTextFields] = useState([
+
     { id: 1, text: '', x: 50, y: 15, fontSize: 32, color: '#FFFFFF' }
   ]);
   const [fontSizeMultiplier, setFontSizeMultiplier] = useState(1);
@@ -67,6 +70,13 @@ const CreateMeme = () => {
   const handleSave = async () => {
     if (isUploading) return;
 
+    if (!user) {
+      if (confirm("You need to be logged in to save/upload memes. Go to login?")) {
+        navigate('/login');
+      }
+      return;
+    }
+
     const container = document.querySelector('.relative.inline-block');
     if (container && container.exportMeme) {
       const exportCanvas = container.exportMeme();
@@ -83,15 +93,14 @@ const CreateMeme = () => {
         };
 
         try {
-          await api.uploadMeme(memeData);
+          await api.uploadMeme(memeData, user.accessToken);
           setSaveStatus('Saved to Cloud!');
           refreshMemes();
+          // Also save locally as backup
           saveMeme(memeData);
         } catch (error) {
           console.error('Failed to upload to server:', error);
-          const saved = saveMeme(memeData);
-          if (saved) setSaveStatus('Saved Locally');
-          else setSaveStatus('Save Failed');
+          setSaveStatus('Upload Failed');
         } finally {
           setIsUploading(false);
           setTimeout(() => setSaveStatus(''), 3000);

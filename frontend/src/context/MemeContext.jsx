@@ -34,7 +34,11 @@ export const MemeProvider = ({ children }) => {
         url: meme.imageData,
         name: meme.name,
         template: meme.template,
-        date: new Date(meme.createdAt).toISOString().split('T')[0]
+        date: new Date(meme.createdAt).toISOString().split('T')[0],
+        authorName: meme.authorName || 'Anonymous',
+        authorUID: meme.authorUID,
+        upvotes: meme.upvotes || [],
+        downvotes: meme.downvotes || []
       }));
 
       if (pageNum === 1) {

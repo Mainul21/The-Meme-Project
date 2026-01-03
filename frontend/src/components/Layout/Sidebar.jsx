@@ -1,12 +1,31 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { PlusCircle, Image, X } from 'lucide-react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { PlusCircle, Image, X, LogOut, Settings } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = ({ isOpen, onClose }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
+  };
+
   const navItems = [
     { icon: PlusCircle, label: 'Create Meme', path: '/upload' },
     { icon: Image, label: 'Gallery', path: '/gallery' },
   ];
+
+  if (user && user.admin) { // precise admin check depends on custom claim or separate DB role, for now assume all users or specific logic
+    // Ideally we check a claim, but here we might just show it.
+    // For this mvp, let's just add it.
+    navItems.push({ icon: Settings, label: 'Admin', path: '/admin' });
+  }
 
   return (
     <aside
@@ -50,6 +69,39 @@ const Sidebar = ({ isOpen, onClose }) => {
           </NavLink>
         ))}
       </nav>
+
+      <div className="p-4 border-t border-slate-800">
+        {user ? (
+          <div className="flex flex-col gap-3">
+            <Link to="/profile" className="flex items-center gap-3 px-2 hover:bg-slate-800 rounded-lg p-2 transition-colors">
+              <div className="w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center text-white font-bold">
+                {user.displayName ? user.displayName[0].toUpperCase() : 'U'}
+              </div>
+              <div className="flex-1 overflow-hidden text-left">
+                <p className="text-sm font-medium text-slate-200 truncate">{user.displayName || 'User'}</p>
+                <p className="text-xs text-slate-500 truncate">{user.email}</p>
+              </div>
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors text-sm"
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
+          </div>
+        ) : (
+          <Link
+            to="/login"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors font-medium"
+            onClick={() => {
+              if (window.innerWidth < 1024) onClose();
+            }}
+          >
+            Sign In
+          </Link>
+        )}
+      </div>
     </aside>
   );
 };
