@@ -7,6 +7,7 @@ import {
     updateProfile
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
+import Swal from 'sweetalert2';
 
 const AuthContext = createContext();
 
@@ -49,7 +50,12 @@ export const AuthProvider = ({ children }) => {
             if (Date.now() - lastActivity > IDLE_TIMEOUT) {
                 console.log('Session timed out due to inactivity');
                 logout();
-                alert('Session expired due to inactivity. Please sign in again.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Session Expired',
+                    text: 'Your session has expired due to inactivity. Please sign in again.',
+                    confirmButtonColor: '#7c3aed'
+                });
             }
         };
 

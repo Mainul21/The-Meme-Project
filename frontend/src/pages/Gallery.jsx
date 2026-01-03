@@ -5,6 +5,7 @@ import { Download, Trash2, X, Loader2, ChevronDown, ThumbsUp, ThumbsDown } from 
 import Card from '../components/UI/Card';
 import { api } from '../services/api';
 import { deleteMeme as deleteLocalMeme } from '../utils/memeStorage';
+import Swal from 'sweetalert2';
 
 const Gallery = () => {
   const {
@@ -55,7 +56,12 @@ const Gallery = () => {
 
   const handleVote = async (memeId, type) => {
     if (!user) {
-      alert('Please login to vote!');
+      Swal.fire({
+        icon: 'info',
+        title: 'Login Required',
+        text: 'Please login to vote!',
+        confirmButtonColor: '#7c3aed'
+      });
       return;
     }
 
@@ -108,7 +114,12 @@ const Gallery = () => {
         delete newState[memeId];
         return newState;
       });
-      alert('Failed to submit vote');
+      Swal.fire({
+        icon: 'error',
+        title: 'Vote Failed',
+        text: 'Unable to submit your vote. Please try again.',
+        confirmButtonColor: '#ef4444'
+      });
     }
   };
 
@@ -116,11 +127,26 @@ const Gallery = () => {
     if (!user) return;
 
     if (meme.authorUID && meme.authorUID !== user.uid && !user.admin) {
-      alert("You can only delete your own memes.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Access Denied',
+        text: 'You can only delete your own memes.',
+        confirmButtonColor: '#ef4444'
+      });
       return;
     }
 
-    if (confirm('Are you sure you want to delete this meme?')) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
       try {
         if (isOnline) {
           await api.deleteMeme(meme.id, user.accessToken);
@@ -133,9 +159,22 @@ const Gallery = () => {
         if (selectedMeme?.id === meme.id) {
           setSelectedMeme(null);
         }
+        Swal.fire({
+          title: 'Deleted!',
+          text: 'Your meme has been deleted.',
+          icon: 'success',
+          confirmButtonColor: '#7c3aed',
+          timer: 2000,
+          showConfirmButton: false
+        });
       } catch (error) {
         console.error('Failed to delete meme:', error);
-        alert('Failed to delete meme. Please try again.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Delete Failed',
+          text: 'Failed to delete meme. Please try again.',
+          confirmButtonColor: '#ef4444'
+        });
       }
     }
   };

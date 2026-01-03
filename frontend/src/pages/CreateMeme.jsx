@@ -9,6 +9,7 @@ import { saveMeme } from '../utils/memeStorage';
 import { api } from '../services/api';
 import { useMemeContext } from '../context/MemeContext';
 import { useAuth } from '../context/AuthContext';
+import Swal from 'sweetalert2';
 
 const CreateMeme = () => {
   const navigate = useNavigate();
@@ -71,7 +72,17 @@ const CreateMeme = () => {
     if (isUploading) return;
 
     if (!user) {
-      if (confirm("You need to be logged in to save/upload memes. Go to login?")) {
+      const result = await Swal.fire({
+        title: 'Login Required',
+        text: "You need to be logged in to save/upload memes. Go to login?",
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#7c3aed',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Yes, Login'
+      });
+
+      if (result.isConfirmed) {
         navigate('/login');
       }
       return;
