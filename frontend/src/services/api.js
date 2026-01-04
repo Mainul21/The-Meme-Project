@@ -48,6 +48,23 @@ export const api = {
     }
   },
 
+  // Get memes by user UID
+  async getUserMemes(uid) {
+    try {
+      const response = await fetch(`${API_URL}/memes/user/${uid}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch user memes');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching user memes:', error);
+      throw error;
+    }
+  },
+
+
   // Get single meme by ID
   async getMeme(id) {
     try {

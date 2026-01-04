@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './components/Layout/DashboardLayout';
 import CreateMeme from './pages/CreateMeme';
-import Gallery from './pages/Gallery';
+import MemeFeed from './pages/MemeFeed';
+import MyGallery from './pages/MyGallery';
 import UploadTemplate from './pages/UploadTemplate';
 import { AuthProvider } from './context/AuthContext';
 import { MemeProvider } from './context/MemeContext';
@@ -24,7 +25,8 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/upload" element={<UploadTemplate />} />
               <Route path="/create" element={<CreateMeme />} />
-              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/meme-feed" element={<MemeFeed />} />
+              <Route path="/gallery" element={<MyGallery />} />
               <Route path="*" element={<div className="text-center text-slate-400 mt-20">Page not found</div>} />
             </Routes>
           </DashboardLayout>

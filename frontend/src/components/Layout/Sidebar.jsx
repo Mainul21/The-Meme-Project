@@ -18,7 +18,8 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const navItems = [
     { icon: PlusCircle, label: 'Create Meme', path: '/upload' },
-    { icon: Image, label: 'Gallery', path: '/gallery' },
+    { icon: Image, label: 'Meme Feed', path: '/meme-feed' },
+    { icon: Image, label: 'My Gallery', path: '/gallery' },
   ];
 
   if (user && user.admin) { // precise admin check depends on custom claim or separate DB role, for now assume all users or specific logic
